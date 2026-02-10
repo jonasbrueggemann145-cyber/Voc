@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Englisch lernen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Vokabelliste */
+        .vocab-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .vocab-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .vocab-item input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .vocab-item button {
+            padding: 10px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .vocab-item button:hover {
+            background: #da190b;
+        }
+
+        .add-vocab {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-vocab input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .add-vocab button {
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-vocab button:hover {
+            background: #45a049;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            text-align: center;
+        }
+
+        .quiz-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 12px;
+            margin: 30px 0;
+            font-size: 2em;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .quiz-answer {
+            display: none;
+            font-size: 1.5em;
+            color: #4CAF50;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .quiz-answer.show {
+            display: block;
+        }
+
+        .feedback {
+            display: none;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-buttons button {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .check-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .show-answer-btn {
+            background: #FF9800;
+            color: white;
+        }
+
+        .next-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .quiz-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-item .label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Import/Export */
+        .import-export {
+            display: grid;
+            gap: 20px;
+        }
+
+        .import-export textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .import-export button {
+            padding: 15px 30px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .import-export button:hover {
+            background: #0b7dda;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Vokabeltrainer</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('verwalten')">Vokabeln verwalten</button>
+            <button class="tab" onclick="switchTab('lernen')">Lernen</button>
+            <button class="tab" onclick="switchTab('statistik')">Statistik</button>
+            <button class="tab" onclick="switchTab('import')">Import/Export</button>
+        </div>
+
+        <div class="content">
+            <!-- Vokabeln verwalten -->
+            <div id="verwalten" class="section active">
+                <h2 style="margin-bottom: 20px;">Meine Vokabeln</h2>
+                <div id="vocabList" class="vocab-list"></div>
+                <div class="add-vocab">
+                    <input type="text" id="newEnglish" placeholder="Englisch">
+                    <input type="text" id="newGerman" placeholder="Deutsch">
+                    <button onclick="addVocab()">➕ Hinzufügen</button>
+                </div>
+            </div>
+
+            <!-- Lernen -->
+            <div id="lernen" class="section">
+                <div class="quiz-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar">0%</div>
+                    </div>
+                    
+                    <div class="quiz-card" id="quizCard">
+                        Klicke auf "Nächste Vokabel" um zu starten
+                    </div>
+                    
+                    <input type="text" id="answerInput" class="answer-input" placeholder="Deine Antwort hier eingeben...">
+                    
+                    <div class="quiz-answer" id="quizAnswer"></div>
+                    <div class="feedback" id="feedback"></div>
+                    
+                    <div class="quiz-buttons">
+                        <button class="check-btn" onclick="checkAnswer()">✓ Antwort prüfen</button>
+                        <button class="show-answer-btn" onclick="showAnswer()">💡 Lösung zeigen</button>
+                        <button class="next-btn" onclick="nextVocab()">➡️ Nächste Vokabel</button>
+                    </div>
+
+                    <div class="stats" style="margin-top: 30px;">
+                        <div class="stat-item">
+                            <div class="number" id="correctCount" style="color: #4CAF50;">0</div>
+                            <div class="label">✓ Richtig</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number" id="wrongCount" style="color: #f44336;">0</div>
+                            <div class="label">✗ Falsch</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number" id="accuracyPercent" style="color: #667eea;">0%</div>
+                            <div class="label">Genauigkeit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik -->
+            <div id="statistik" class="section">
+                <h2 style="margin-bottom: 20px;">Deine Lernstatistik</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="number" id="totalVocabs">0</div>
+                        <div class="label">Gesamt Vokabeln</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="learnedCount">0</div>
+                        <div class="label">Gelernt</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="percentLearned">0%</div>
+                        <div class="label">Fortschritt</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import/Export -->
+            <div id="import" class="section">
+                <h2 style="margin-bottom: 20px;">Vokabeln sichern & laden</h2>
+                <div class="import-export">
+                    <div>
+                        <h3 style="margin-bottom: 10px;">Export (Kopieren & Speichern)</h3>
+                        <textarea id="exportArea" readonly></textarea>
+                        <button onclick="exportVocabs()">📋 Vokabeln exportieren</button>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 10px;">Import (Einfügen & Laden)</h3>
+                        <textarea id="importArea" placeholder="Füge hier deine gespeicherten Vokabeln ein..."></textarea>
+                        <button onclick="importVocabs()">📥 Vokabeln importieren</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vorinstallierte Vokabeln
+        const defaultVocabs = [
+            { english: "skill", german: "Fähigkeit, Fertigkeit" },
+            { english: "theme", german: "Thema" },
+            { english: "strength", german: "Stärke, Kraft" },
+            { english: "work experience", german: "Praktikum/Praktika; Arbeitserfahrung(en)" },
+            { english: "criticism", german: "Kritik" },
+            { english: "confident", german: "(selbst)sicher; zuversichtlich" },
+            { english: "energetic", german: "energisch, energiereich" },
+            { english: "enthusiastic", german: "begeistert" },
+            { english: "punctual", german: "pünktlich" },
+            { english: "reliable", german: "zuverlässig, verlässlich" },
+            { english: "study", german: "studieren; lernen" },
+            { english: "university", german: "Universität" },
+            { english: "fire sb.", german: "jn. feuern, entlassen" },
+            { english: "pull back", german: "sich zurückziehen, zurückweichen" },
+            { english: "I get it.", german: "Ich verstehe. / Ich kapiere." },
+            { english: "sandals", german: "Sandalen" },
+            { english: "foolish", german: "töricht, dumm" },
+            { english: "appearance", german: "Erscheinung(sbild), Aussehen" },
+            { english: "program", german: "Programm" },
+            { english: "storey/story", german: "Stock, Stockwerk, Etage" },
+            { english: "unattractive", german: "unattraktiv" },
+            { english: "mature", german: "reif, vernünftig" },
+            { english: "lipstick", german: "Lippenstift" },
+            { english: "cheerful", german: "fröhlich, gut gelaunt" },
+            { english: "curly", german: "lockig" },
+            { english: "graveyard", german: "Friedhof" },
+            { english: "lady", german: "Dame" },
+            { english: "machine", german: "Maschine, Gerät" },
+            { english: "neon", german: "Neon; neonfarbig" },
+            { english: "can", german: "Dose" },
+            { english: "accept", german: "akzeptieren, annehmen" },
+            { english: "credit card", german: "Kreditkarte" },
+            { english: "answer the phone", german: "ans Telefon gehen" },
+            { english: "slam", german: "(zu-, hin)knallen" },
+            { english: "admire", german: "bewundern" },
+            { english: "equal", german: "gleich(berechtigt)" },
+            { english: "for sure", german: "ganz sicher, ganz bestimmt" },
+            { english: "interviewer", german: "Interviewer/in" },
+            { english: "text", german: "Klappentext (eines Buches)" },
+            { english: "pretend (to do sth.)", german: "so tun, als ob (man etwas wäre)" },
+            { english: "in order to", german: "um ... zu" },
+            { english: "realize sth.", german: "etwas erkennen, sich einer Sache bewusst werden" },
+            { english: "complicated", german: "kompliziert" },
+            { english: "lie (to sb.)", german: "(jn. an)lügen" },
+            { english: "lie", german: "Lüge" },
+            { english: "clerk", german: "Angestellte/r" },
+            { english: "immediately", german: "sofort, umgehend, unmittelbar" },
+            { english: "hand sb. sth.", german: "jm. etwas (an)reichen, aushändigen" },
+            { english: "application form", german: "Bewerbungsformular, Antragsformular" },
+            { english: "on one's own", german: "alleine, selbstständig (ohne Unterstützung)" },
+            { english: "boardwalk", german: "Steg, Uferpromenade (aus Holz)" },
+            { english: "career", german: "Karriere; (schulischer/beruflicher) Werdegang" },
+            { english: "up to", german: "bis (zu)" },
+            { english: "CV (= curriculum vitae)", german: "Lebenslauf" },
+            { english: "trainee", german: "Auszubildende/r, Trainee" },
+            { english: "qualification", german: "(Schul-)Abschluss, Qualifikation" },
+            { english: "instructor", german: "Lehrer/in" },
+            { english: "qualify", german: "(sich) qualifizieren" },
+            { english: "apprentice", german: "Lehrling, Auszubildende/r" },
+            { english: "organization", german: "Organisation" },
+            { english: "advertisement", german: "Anzeige, Inserat, Annonce" },
+            { english: "assistant", german: "Helfer/in, Assistent/in" },
+            { english: "communication", german: "Kommunikation, Verständigung" },
+            { english: "(working) hours", german: "Arbeitszeit(en)" },
+            { english: "salary", german: "Lohn, Gehalt" },
+            { english: "apply (for)", german: "sich bewerben (um)" },
+            { english: "stylist", german: "Friseur/in; (Mode-)Stylist/in" },
+            { english: "lead", german: "führen, leiten" },
+            { english: "attitude", german: "Einstellung, Haltung" }
+        ];
+
+        let vocabs = [];
+        let currentVocabIndex = 0;
+        let learnedCount = 0;
+        let correctAnswers = 0;
+        let wrongAnswers = 0;
+        let currentQuestion = '';
+        let currentAnswer = '';
+        let askingEnglish = true;
+
+        // Initialisierung
+        function init() {
+            const saved = localStorage.getItem('vocabs');
+            if (saved) {
+                vocabs = JSON.parse(saved);
+            } else {
+                vocabs = [...defaultVocabs];
+                saveVocabs();
+            }
+            
+            // Lade Statistiken
+            correctAnswers = parseInt(localStorage.getItem('correctAnswers')) || 0;
+            wrongAnswers = parseInt(localStorage.getItem('wrongAnswers')) || 0;
+            
+            renderVocabList();
+            updateStats();
+            updateQuizStats();
+        }
+
+        function saveVocabs() {
+            localStorage.setItem('vocabs', JSON.stringify(vocabs));
+        }
+
+        function saveStats() {
+            localStorage.setItem('correctAnswers', correctAnswers);
+            localStorage.setItem('wrongAnswers', wrongAnswers);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'statistik') {
+                updateStats();
+            }
+        }
+
+        function renderVocabList() {
+            const list = document.getElementById('vocabList');
+            list.innerHTML = '';
+            vocabs.forEach((vocab, index) => {
+                const item = document.createElement('div');
+                item.className = 'vocab-item';
+                item.innerHTML = `
+                    <input type="text" value="${vocab.english}" onchange="updateVocab(${index}, 'english', this.value)">
+                    <input type="text" value="${vocab.german}" onchange="updateVocab(${index}, 'german', this.value)">
+                    <button onclick="deleteVocab(${index})">🗑️ Löschen</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function addVocab() {
+            const english = document.getElementById('newEnglish').value.trim();
+            const german = document.getElementById('newGerman').value.trim();
+            
+            if (english && german) {
+                vocabs.push({ english, german });
+                saveVocabs();
+                renderVocabList();
+                document.getElementById('newEnglish').value = '';
+                document.getElementById('newGerman').value = '';
+                updateStats();
+            } else {
+                alert('Bitte beide Felder ausfüllen!');
+            }
+        }
+
+        function updateVocab(index, field, value) {
+            vocabs[index][field] = value;
+            saveVocabs();
+        }
+
+        function deleteVocab(index) {
+            if (confirm('Vokabel wirklich löschen?')) {
+                vocabs.splice(index, 1);
+                saveVocabs();
+                renderVocabList();
+                updateStats();
+            }
+        }
+
+        function normalizeAnswer(text) {
+            // Entfernt Sonderzeichen, macht Kleinbuchstaben, entfernt extra Leerzeichen
+            return text.toLowerCase()
+                .replace(/[().,;!?]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function checkAnswer() {
+            const userInput = document.getElementById('answerInput').value;
+            const feedback = document.getElementById('feedback');
+            const answer = document.getElementById('quizAnswer');
+            
+            if (!userInput.trim()) {
+                alert('Bitte gib eine Antwort ein!');
+                return;
+            }
+
+            const normalizedUser = normalizeAnswer(userInput);
+            const normalizedCorrect = normalizeAnswer(currentAnswer);
+            
+            // Prüfe verschiedene mögliche Antworten (getrennt durch ; oder /)
+            const possibleAnswers = normalizedCorrect.split(/[;\/]/).map(a => a.trim());
+            const isCorrect = possibleAnswers.some(possible => 
+                normalizedUser === possible || 
+                normalizedUser.includes(possible) || 
+                possible.includes(normalizedUser)
+            );
+            
+            if (isCorrect) {
+                feedback.textContent = '✓ Richtig! Super gemacht!';
+                feedback.className = 'feedback correct show';
+                correctAnswers++;
+            } else {
+                feedback.textContent = '✗ Leider falsch. Die richtige Antwort war: ' + currentAnswer;
+                feedback.className = 'feedback wrong show';
+                wrongAnswers++;
+                answer.textContent = currentAnswer;
+                answer.classList.add('show');
+            }
+            
+            saveStats();
+            updateQuizStats();
+        }
+
+        function showAnswer() {
+            const answer = document.getElementById('quizAnswer');
+            answer.textContent = '💡 Lösung: ' + currentAnswer;
+            answer.classList.add('show');
+        }
+
+        function nextVocab() {
+            if (vocabs.length === 0) {
+                alert('Keine Vokabeln vorhanden! Füge erst welche hinzu.');
+                return;
+            }
+            
+            // Zurücksetzen
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('quizAnswer').classList.remove('show');
+            
+            // Neue Vokabel
+            currentVocabIndex = Math.floor(Math.random() * vocabs.length);
+            const vocab = vocabs[currentVocabIndex];
+            const card = document.getElementById('quizCard');
+            
+            // Zufällig entscheiden ob Englisch oder Deutsch gefragt wird
+            askingEnglish = Math.random() > 0.5;
+            
+            if (askingEnglish) {
+                currentQuestion = vocab.german;
+                currentAnswer = vocab.english;
+                card.innerHTML = '🇩🇪 ➡️ 🇬🇧<br><br>' + vocab.german;
+            } else {
+                currentQuestion = vocab.english;
+                currentAnswer = vocab.german;
+                card.innerHTML = '🇬🇧 ➡️ 🇩🇪<br><br>' + vocab.english;
+            }
+            
+            learnedCount++;
+            updateProgressBar();
+            
+            // Fokus auf Eingabefeld
+            document.getElementById('answerInput').focus();
+        }
+
+        function updateProgressBar() {
+            const progress = document.getElementById('progressBar');
+            const percent = vocabs.length > 0 ? Math.min(100, (learnedCount / vocabs.length) * 100) : 0;
+            progress.style.width = percent + '%';
+            progress.textContent = Math.round(percent) + '%';
+        }
+
+        function updateQuizStats() {
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('wrongCount').textContent = wrongAnswers;
+            
+            const total = correctAnswers + wrongAnswers;
+            const accuracy = total > 0 ? Math.round((correctAnswers / total) * 100) : 0;
+            document.getElementById('accuracyPercent').textContent = accuracy + '%';
+        }
+
+        function updateStats() {
+            document.getElementById('totalVocabs').textContent = vocabs.length;
+            document.getElementById('learnedCount').textContent = learnedCount;
+            const percent = vocabs.length > 0 ? Math.round((learnedCount / vocabs.length) * 100) : 0;
+            document.getElementById('percentLearned').textContent = percent + '%';
+        }
+
+        function exportVocabs() {
+            const exportArea = document.getElementById('exportArea');
+            exportArea.value = JSON.stringify(vocabs, null, 2);
+            exportArea.select();
+            document.execCommand('copy');
+            alert('Vokabeln wurden kopiert! Du kannst sie jetzt in einer Datei speichern.');
+        }
+
+        function importVocabs() {
+            const importArea = document.getElementById('importArea');
+            try {
+                const imported = JSON.parse(importArea.value);
+                if (Array.isArray(imported)) {
+                    vocabs = imported;
+                    saveVocabs();
+                    renderVocabList();
+                    updateStats();
+                    importArea.value = '';
+                    alert('Vokabeln erfolgreich importiert!');
+                } else {
+                    alert('Ungültiges Format!');
+                }
+            } catch (e) {
+                alert('Fehler beim Importieren! Bitte überprüfe das Format.');
+            }
+        }
+
+        // Enter-Taste zum Hinzufügen und Prüfen
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('newGerman').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addVocab();
+                }
+            });
+            
+            document.getElementById('answerInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        });
+
+        // Initialisierung beim Laden
+        init();
+    </script>
+</body>
+</html>
